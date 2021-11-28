@@ -1,10 +1,14 @@
 ﻿using RPG_Framework;
+using System;
 
 namespace RPG_Levelups
 {
     public class ModStat : RPGStat
     {
         public double BonusPerLevel { get; set; }
+
+        [NonSerialized]
+        public int lastSavedLevel;
 
         public ModStat() : base()
         {
@@ -26,14 +30,21 @@ namespace RPG_Levelups
             return CurrentLevel * BonusPerLevel;
         }
 
+        public double GetUnsavedBonus()
+        {
+            int levelDifference = CurrentLevel - lastSavedLevel;
+            return levelDifference * BonusPerLevel;
+        }
+
         public static ModStat FromRPGStat(RPGStat rpgStat)
         {
             var stat = new ModStat(rpgStat.Name, rpgStat.MaxLevel);
             stat.ExpTable = rpgStat.ExpTable;
             stat.RaiseLevel(rpgStat.CurrentLevel);
             stat.RaiseExp(rpgStat.CurrentLevel);
+            stat.lastSavedLevel = rpgStat.CurrentLevel;
             stat.onLevelRaised = rpgStat.onLevelRaised;
-            stat.OnLevelReduced = rpgStat.OnLevelReduced;
+            stat.onLevelReduced = rpgStat.onLevelReduced;
             return stat;
         }
     }

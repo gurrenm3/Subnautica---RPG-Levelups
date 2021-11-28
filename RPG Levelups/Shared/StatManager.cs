@@ -1,15 +1,19 @@
 ﻿using RPG_Framework;
+using RPG_Framework.Extensions;
 using StatsCore.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using UnityEngine.Events;
 
 namespace RPG_Levelups
 {
     public class StatManager
     {
+        [NonSerialized]
+        public static List<Action<StatManager>> onStatMgrLoaded = new List<Action<StatManager>>();
         public static StatManager Instance { get; private set; }
         private const string fileName = "RPG Leveling.json";
         public List<ModStat> AllStats { get; set; } = new List<ModStat>();
@@ -23,6 +27,7 @@ namespace RPG_Levelups
         {
             var maxHealth = CreateNewStat(StatType.MaxHealth.ToString(), 30, 100, 1.5);
             maxHealth.BonusPerLevel = 5;
+            maxHealth.DisplayName = "Max Health";
 
             var maxFood = CreateNewStat(StatType.MaxFood.ToString(), 50, 150, 1.5);
             maxFood.BonusPerLevel = 5;
@@ -72,7 +77,7 @@ namespace RPG_Levelups
             return json == text;
         }
 
-        public static void AddExp(StatType statType, double amount) => GetStat(statType).RaiseExp(amount);
+        public static void AddExp(StatType statType, double amount) => GetStat(statType)?.RaiseExp(amount);
         public static void AddExp(DamageType damageType, double amount) => GetStat(damageType)?.RaiseExp(amount);
 
         public static ModStat GetStat(StatType statType) => Instance.AllStats.FirstOrDefault(stat => stat.Name == statType.ToString());
@@ -82,7 +87,6 @@ namespace RPG_Levelups
         {
             var rpgStat = RPGStatFactory.Create(name, maxLevel, baseExp, expMultiplier);
             var stat = ModStat.FromRPGStat(rpgStat);
-            stat.onLevelRaised.Add((s) => ErrorMessage.AddMessage($"{s.Name} has just leveled up. Current level: {s.CurrentLevel}"));
             Instance.AllStats.Add(stat);
             return stat;
         }
@@ -102,7 +106,24 @@ namespace RPG_Levelups
                 string json = Encoding.UTF8.GetString(File.ReadAllBytes(savePath));
                 statManager = JsonUtil.Deserialize<StatManager>(json);
             }
+
+            statManager.AllStats.ForEach(stat =>
+            {
+                InitializeStat(stat);
+                stat.lastSavedLevel = stat.CurrentLevel;
+            });
+
+            onStatMgrLoaded?.InvokeAll(statManager);
             return statManager;
+        }
+
+        private static void InitializeStat(RPGStat stat)
+        {
+            stat.onLevelRaised.Add((s) =>
+            {
+                var modStat = (ModStat)s;
+                ErrorMessage.AddMessage($"{modStat.DisplayName} has just leveled up. Current level: {modStat.CurrentLevel}");
+            });
         }
     }
 }

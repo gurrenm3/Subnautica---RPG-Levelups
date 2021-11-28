@@ -63,12 +63,16 @@ namespace RPG_Levelups.Patches
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                
+                var health = StatManager.GetStat(StatType.MaxHealth);
+
+                ErrorMessage.AddMessage("Adding EXP");
+                StatManager.AddExp(StatType.MaxHealth, 1000);
+                ErrorMessage.AddMessage("Current level: " + health.CurrentLevel);
             }
 
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                
+                Player.main.liveMixin.health -= 10;
             }
         }
     }

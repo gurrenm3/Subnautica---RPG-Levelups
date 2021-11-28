@@ -19,23 +19,20 @@ namespace RPG_Levelups.Patches
         [HarmonyPostfix]
         internal static void Postfix(SaveLoadManager __instance)
         {
+            StatManager.onStatMgrLoaded.Add(SetLevelupEvents);
             StatManager statManager = StatManager.LoadFromFile();
-            survival = Player.main.GetSurvival();
-            ApplyStatBonuses();
+            ApplyStatBonuses(statManager);
         }
 
-        private static void ApplyStatBonuses()
+        private static void SetLevelupEvents(StatManager statManager)
         {
             // Max Health
             var maxHealth = StatManager.GetStat(StatType.MaxHealth);
-            maxHealth.onLevelRaised.Add((stat) => Player.main.liveMixin.RaiseMaxHealth((int)maxHealth.BonusPerLevel));
-            Player.main.liveMixin.RaiseMaxHealth((int)maxHealth.GetTotalCurrentBonus());
+            maxHealth.onLevelRaised.Add((stat) => Player.main.liveMixin.RaiseMaxHealth((int)((ModStat)stat).BonusPerLevel));
 
 
             // Max Food
             var maxFood = StatManager.GetStat(StatType.MaxFood);
-            survival.RaiseStomachSize((int)maxFood.GetTotalCurrentBonus());
-            survival.RaiseStomachOverfillSize((int)maxFood.GetTotalCurrentBonus());
             maxFood.onLevelRaised.Add((stat) =>
             {
                 survival.RaiseStomachSize((int)maxFood.BonusPerLevel);
@@ -45,8 +42,6 @@ namespace RPG_Levelups.Patches
 
             // Max Water
             var maxWater = StatManager.GetStat(StatType.MaxWater);
-            survival.RaiseWaterCapacity((int)maxWater.GetTotalCurrentBonus());
-            survival.RaiseWaterOverfillSize((int)maxWater.GetTotalCurrentBonus());
             maxWater.onLevelRaised.Add((stat) =>
             {
                 survival.RaiseWaterCapacity((int)maxWater.BonusPerLevel);
@@ -56,14 +51,49 @@ namespace RPG_Levelups.Patches
 
             // Max Lungs
             var maxLungs = StatManager.GetStat(StatType.MaxLungs);
-            Player.main.GetLungs().oxygenCapacity += (int)maxLungs.GetTotalCurrentBonus();
             maxLungs.onLevelRaised.Add((stat) => Player.main.GetLungs().oxygenCapacity += (int)maxLungs.BonusPerLevel);
 
 
             // Suffocation
             var suffocation = StatManager.GetStat(StatType.Suffocation);
-            Player.main.RaiseSuffocationTime((float)suffocation.GetTotalCurrentBonus());
             suffocation.onLevelRaised.Add((stat) => Player.main.RaiseSuffocationTime((float)suffocation.BonusPerLevel));
+
+
+            // Max Depth
+            /*var maxDepth = StatManager.GetStat(StatType.MaxDepth);
+            maxDepth.onLevelRaised.Add((stat) => Player.main.RaiseSuffocationTime((float)maxDepth.BonusPerLevel));*/
+        }
+
+        private static void ApplyStatBonuses(StatManager statManager)
+        {
+            ErrorMessage.AddMessage("Applying Stat Bonuses");
+            survival = Player.main.GetSurvival();
+
+            // Max Health
+            var maxHealth = StatManager.GetStat(StatType.MaxHealth); 
+            Player.main.liveMixin.RaiseMaxHealth((int)maxHealth.GetTotalCurrentBonus());
+
+
+            // Max Food
+            var maxFood = StatManager.GetStat(StatType.MaxFood);
+            survival.RaiseStomachSize((int)maxFood.GetTotalCurrentBonus());
+            survival.RaiseStomachOverfillSize((int)maxFood.GetTotalCurrentBonus());
+            
+
+            // Max Water
+            var maxWater = StatManager.GetStat(StatType.MaxWater);
+            survival.RaiseWaterCapacity((int)maxWater.GetTotalCurrentBonus());
+            survival.RaiseWaterOverfillSize((int)maxWater.GetTotalCurrentBonus());
+
+
+            // Max Lungs
+            var maxLungs = StatManager.GetStat(StatType.MaxLungs);
+            Player.main.GetLungs().oxygenCapacity += (int)maxLungs.GetTotalCurrentBonus();            
+
+
+            // Suffocation
+            var suffocation = StatManager.GetStat(StatType.Suffocation);
+            Player.main.RaiseSuffocationTime((float)suffocation.GetTotalCurrentBonus());
 
 
             // Max Depth
