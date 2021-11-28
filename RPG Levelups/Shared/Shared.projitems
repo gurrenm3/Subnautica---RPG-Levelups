@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>99fc9ad4-21a1-4bd5-a48e-1bd4996edde0</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>RPG_Levelups</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Guard.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModStat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Patches\Player_OnKill.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Patches\Player_Start.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Patches\SaveLoadManager_InitializeNewGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Patches\Player_OnTakeDamage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Patches\Player_Update.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Patches\SaveLoadManager_SaveToDeepStorageAsync.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QModPatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StatManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StatType.cs" />
+  </ItemGroup>
+</Project>
